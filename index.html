@@ -3,13 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>Pixel Party</title>
   <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="previews.css?v=purple-preview-1">
+  <link rel="stylesheet" href="previews.css?v=light-lock-clean-20261014">
   <link rel="stylesheet" href="font-theme.css">
   <link rel="stylesheet" href="victory.css">
   <link rel="stylesheet" href="gameplay-upgrades.css">
-  <link rel="stylesheet" href="landing-refresh.css?v=word-weaver-final-1">
+  <link rel="stylesheet" href="landing-refresh.css?v=light-lock-final-20261014">
+  <style id="light-lock-layout-first-load">
+    .light-layout{display:grid!important;grid-template-columns:auto minmax(240px,1fr)!important;grid-template-rows:auto auto!important;justify-content:start!important;align-items:center!important;gap:12px 14px!important;padding:8px!important}
+    .light-layout>.light-grid{grid-column:1!important;grid-row:1 / span 2!important;align-self:center!important}
+    .light-layout>.light-controls{grid-column:2!important;grid-row:1!important;align-self:center!important;justify-self:start!important}
+    .light-layout>div:first-child{grid-column:2!important;grid-row:2!important;justify-self:start!important}
+  </style>
+  <style id="light-lock-layout-final">
+    #gameArea .light-layout{display:grid!important;grid-template-columns:auto 214px!important;grid-template-rows:auto auto!important;gap:12px 14px!important;justify-content:start!important;align-items:center!important;flex-wrap:nowrap!important;padding:8px!important}
+    #gameArea .light-layout>.light-grid{grid-column:1!important;grid-row:1 / span 2!important;order:0!important}
+    #gameArea .light-layout>.light-controls{grid-column:2!important;grid-row:1!important;order:0!important;align-self:center!important;justify-self:start!important}
+    #gameArea .light-layout>div:first-child{grid-column:2!important;grid-row:2!important;order:0!important}
+    #gameArea .light-layout>.light-grid{grid-column:1!important;grid-row:1 / span 2!important}
+    #gameArea .light-layout>.light-grid + .light-controls{grid-column:2!important;grid-row:1!important}
+    #gameArea .light-layout>.light-grid ~ div:not(.light-controls){grid-column:2!important;grid-row:2!important}
+  </style>
 </head>
 <body>
   <header class="topbar">
@@ -67,6 +85,33 @@
             </div>
             <div class="card-copy"><h3>PATTERN<br>PULSE</h3><p>Read the sequence. Find what comes next. Keep climbing.</p><span class="tag">LOGIC</span></div>
           </button>
+          <button class="game-card quicksort-card" data-game="sort">
+            <div class="card-top"><span class="number">04</span><strong class="wip-label">WIP</strong><span class="play-circle">↗</span></div>
+            <div class="art placeholder-art">PLACEHOLDER</div>
+            <div class="card-copy"><h3>WORK IN<br>PROGRESS</h3><p>Coming soon.</p><span class="tag">IN DEVELOPMENT</span></div>
+          </button>
+          <button class="game-card equation-card" data-game="color">
+            <div class="card-top"><span class="number">05</span><strong class="wip-label">WIP</strong><span class="play-circle">↗</span></div>
+            <div class="art placeholder-art">PLACEHOLDER</div>
+            <div class="card-copy"><h3>WORK IN<br>PROGRESS</h3><p>Coming soon.</p><span class="tag">IN DEVELOPMENT</span></div>
+          </button>
+          <button class="game-card light-card" data-game="light">
+            <div class="card-top"><span class="number">06</span><span class="play-circle">↗</span></div>
+            <div class="art light-art">
+              <div class="light-preview-grid" aria-hidden="true">
+                <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+                <i></i><i></i><i></i><i></i><i class="lit"></i><i class="lit"></i><i class="lit"></i>
+                <i></i><i></i><i></i><i></i><i></i><i class="lit"></i><i></i>
+                <i></i><i></i><i></i><i class="lit"></i><i class="lit"></i><i></i><i></i>
+                <i></i><i></i><i></i><i class="lit"></i><i class="lit"></i><i></i><i></i>
+                <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+                <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+              </div>
+              <span class="light-preview-sun">☀</span>
+              <span class="light-preview-block"></span>
+            </div>
+            <div class="card-copy"><h3>LIGHT<br>LOCK</h3><p>Shape expanding beams until the glow matches the target silhouette.</p><span class="tag">GRID LOGIC</span></div>
+          </button>
         </div>
       </section>
     </section>
@@ -91,6 +136,6 @@
 
   </main>
   <div id="toast" class="toast" role="status"></div>
-  <script src="script.js?v=pattern-powerup-purchase-1"></script>
+  <script src="script.js?v=light-solution-place-20261016"></script>
 </body>
 </html>

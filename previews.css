@@ -37,3 +37,15 @@
 .keyboard-answer{max-width:510px;margin:18px auto 0;display:flex;align-items:center;justify-content:center;gap:12px}
 .keyboard-answer span{font-size:17px}
 .keyboard-answer strong{width:120px;min-height:48px;border:2px solid var(--ink);background:white;display:grid;place-items:center;font-size:30px;line-height:1;color:var(--ink);box-shadow:4px 4px 0 var(--yellow)}
+
+/* Light Lock card preview: a miniature 7x7 target board with a sun and a
+   controlled triangular beam, matching the visual language of the game. */
+.light-art{background:#21042e!important;position:relative;overflow:hidden;color:#fff8df}
+.light-art:before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(212,106,244,.18) 1px,transparent 1px),linear-gradient(90deg,rgba(212,106,244,.18) 1px,transparent 1px);background-size:26px 26px;opacity:.7}
+.light-preview-grid{position:absolute;z-index:2;left:50%;top:50%;width:176px;height:176px;transform:translate(-43%,-47%) rotate(-2deg);display:grid;grid-template-columns:repeat(7,1fr);border:2px solid #c79cff;background:#050509;box-shadow:7px 7px 0 rgba(5,5,9,.45)}
+.light-preview-grid i{display:block;border:1px solid #8f55c7;background:#050509}
+.light-preview-grid i.lit{background:#f5df61;box-shadow:inset 0 0 8px rgba(255,248,173,.75)}
+.light-preview-sun{position:absolute;z-index:4;right:31px;top:35px;color:#ffe66a;font-size:30px;line-height:1;text-shadow:0 0 0 #21042e,0 0 12px rgba(255,230,106,.9);transform:rotate(-8deg)}
+.light-preview-block{position:absolute;z-index:5;left:calc(50% + 8px);top:calc(50% + 30px);width:20px;height:20px;background:#8f55c7;border:2px solid #d9b8ff;box-shadow:3px 3px 0 rgba(5,5,9,.65);transform:rotate(-2deg)}
+.game-card:hover .light-preview-sun{animation:light-sun-pulse .8s ease-in-out infinite alternate}
+@keyframes light-sun-pulse{to{transform:rotate(-8deg) scale(1.12);text-shadow:0 0 16px rgba(255,230,106,1)}}

@@ -66,5 +66,111 @@ button{border-radius:0!important}
 .game-shell #removeWrong{display:none!important}.game-shell [style*="text-align:center"]{display:flex!important;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap}.game-shell #checkMultiples,.game-shell #multipleHint{position:static!important;display:inline-block!important}
 .powerup-clue{display:none!important}.pattern-motif-clue{width:min(680px,92%);margin:12px auto -4px;padding:8px 16px;border-top:3px solid #d92f3f;border-bottom:3px solid #d92f3f;text-align:center;color:#d92f3f;font:700 12px DM Mono;letter-spacing:.08em}
 .pattern-motif-clue{display:none!important}.motif-bracket{position:absolute;top:10px;height:30px;border-top:3px solid #d92f3f;border-left:3px solid #d92f3f;border-right:3px solid #d92f3f;border-radius:18px 18px 0 0;pointer-events:none;z-index:3}.motif-bracket span{position:absolute;top:-19px;left:50%;transform:translateX(-50%);white-space:nowrap;color:#d92f3f;background:#eeeadf;padding:0 6px;font:700 9px DM Mono;letter-spacing:.08em}
+.light-layout{display:flex;gap:24px;align-items:center;justify-content:center;flex-wrap:wrap}.light-grid{display:grid;grid-template-columns:repeat(7,42px);gap:4px;padding:14px;background:#e7e2ff;border:2px solid var(--ink)}.light-cell{width:42px;height:42px;border:1px solid #c5bdf0;background:#f7f5ff;cursor:pointer;font-size:21px}.light-cell.lit{background:#ffe95a;box-shadow:inset 0 0 14px #fff2a2}.light-cell.target{outline:2px dashed #b47be8;outline-offset:-5px}.light-cell.block{background:#21042e;color:#fff}.light-controls{display:flex;flex-direction:column;gap:12px;min-width:190px}.light-controls p{font:11px DM Mono;margin:0}
 .word-actions,.game-shell .game-status+div[style]{display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap}.powerup-bar{display:flex;justify-content:center;margin:24px auto 2px;padding-top:14px;border-top:1px solid var(--line)}.powerup-use{border:2px solid var(--ink);background:var(--yellow);color:var(--ink);padding:11px 18px;font:700 11px DM Mono;letter-spacing:.06em;cursor:pointer}.powerup-use span{font-weight:400}.powerup-bar.empty{opacity:.35}.powerup-bar.empty .powerup-use{cursor:pointer}
 @media(max-width:600px){.brand{font-size:19px!important}.hero h1 em{-webkit-text-stroke:2.5px var(--ink)!important;text-shadow:5px 5px 0 #7ea37d!important}.word-board{grid-template-columns:repeat(4,minmax(0,1fr))}.word-answer{align-items:flex-start;flex-direction:column}.word-answer strong{min-width:100%;max-width:100%}}
+.light-cell.lit{background:linear-gradient(135deg,#fffbd0 0%,#ffe45a 45%,#f5ae28 100%);clip-path:polygon(50% 0,100% 100%,0 100%)}.goal-label{font:10px DM Mono;letter-spacing:.08em}.goal-map{display:grid;grid-template-columns:repeat(7,18px);gap:2px;padding:8px;background:#21042e}.goal-map i{width:18px;height:18px;background:#09050d}.goal-map i.goal-on{background:#fff}.light-cell{font-size:22px}
+.light-grid{display:grid!important;grid-template-columns:repeat(7,1fr)!important;grid-template-rows:repeat(7,1fr)!important;width:min(490px,82vw)!important;aspect-ratio:1/1!important;gap:0!important;padding:0!important;background:#050509!important;border:3px solid #c79cff!important}.light-cell{width:auto!important;height:auto!important;min-width:0!important;min-height:0!important;aspect-ratio:1!important;border:1px solid #a66be0!important;background:#050509!important;clip-path:none!important;display:grid!important;place-items:center!important}.light-cell.lit{background:#f5df61!important;box-shadow:inset 0 0 12px #fff8ad!important}.light-cell.block{background:#050509!important}
+.light-grid{background:#050509;border:3px solid #c79cff;gap:0;padding:0}.light-cell{width:52px;height:52px;border:1px solid #a66be0;background:#050509;color:#ffe66a;border-radius:0}.light-cell.lit{background:#f4dd5a;clip-path:polygon(50% 0,100% 100%,0 100%);box-shadow:none}.light-cell.target{outline:1px solid #c79cff;outline-offset:-2px}.goal-map{background:#050509;border:2px solid #c79cff}.goal-map i{background:#000}.goal-map i.goal-on{background:#fff}.light-controls button:disabled{opacity:.32;cursor:not-allowed}.light-cell:not([draggable="true"]){touch-action:none}
+.light-legend{font:11px/1.6 DM Mono!important;color:#6b2c82}.light-legend strong{color:#d92f3f;font-size:16px}
+.light-cell{cursor:grab;transition:transform .08s linear}.light-cell:active{cursor:grabbing}.light-cell.block{cursor:grab}
+.light-controls #rotateLight,.light-controls #placeLight{display:none!important}
+
+/* Light Lock stable controls and fully movable suns */
+.light-layout{display:grid!important;grid-template-columns:220px minmax(0,1fr)!important;align-items:start!important;gap:24px!important;flex-wrap:nowrap!important}.light-layout>.light-grid{grid-column:2;grid-row:1 / span 2}.light-layout>.light-controls{grid-column:1;grid-row:2;align-self:start;position:sticky;top:16px}.light-layout>.goal-label,.light-layout>.goal-map{grid-column:1}.light-cell{touch-action:none!important}
+/* Keep the controls to the right of the grid. */
+.light-layout{grid-template-columns:minmax(0,1fr) 220px!important}.light-layout>.light-grid{grid-column:1;grid-row:1 / span 2}.light-layout>.light-controls{grid-column:2;grid-row:1;position:sticky;top:16px}
+/* Keep the controls immediately beside the grid, with a small consistent gap. */
+.light-layout{grid-template-columns:minmax(0,1fr) max-content!important;column-gap:14px!important;align-items:center!important}.light-layout>.light-controls{grid-column:2;grid-row:1;justify-self:start;align-self:center!important;display:flex!important;flex-direction:column!important;gap:10px!important;min-width:190px!important}.light-layout>.light-controls button{width:100%!important;margin:0!important}
+/* Pull the control stack close to the board instead of pushing it to the edge. */
+.light-layout{display:flex!important;align-items:center!important;justify-content:center!important;gap:12px!important}.light-layout>.light-grid{order:1;flex:0 1 auto!important}.light-layout>.light-controls{order:2;flex:0 0 190px!important;margin:0!important}
+/* Preserve the centered board; arrange controls and the goal map beside it. */
+.light-layout{display:grid!important;grid-template-columns:minmax(150px,1fr) auto minmax(220px,1fr)!important;grid-template-rows:auto auto!important;gap:12px 14px!important;justify-content:initial!important;align-items:center!important}.light-layout>.light-grid{grid-column:2!important;grid-row:1 / span 2!important;order:initial!important}.light-layout>.light-controls{grid-column:3!important;grid-row:1!important;order:initial!important;justify-self:start!important;min-width:190px!important}.light-layout>div:first-child{grid-column:3!important;grid-row:2!important;justify-self:start!important}.light-layout>.light-controls .light-legend{position:absolute;right:calc(100% + 12px);top:50%;width:150px;transform:translateY(-50%);text-align:right}
+/* Dock the whole Light Lock board to the left side of the white game shell. */
+.light-layout{grid-template-columns:auto minmax(240px,1fr)!important;grid-template-rows:auto auto!important;justify-content:start!important;gap:12px 14px!important;padding:8px!important}.light-layout>.light-grid{grid-column:1!important;grid-row:1 / span 2!important}.light-layout>.light-controls{grid-column:2!important;grid-row:1!important}.light-layout>div:first-child{grid-column:2!important;grid-row:2!important}.light-layout>.light-controls .light-legend{right:auto!important;left:0!important;top:calc(100% + 8px)!important;transform:none!important;width:auto!important;text-align:left!important}
+/* Explicitly keep action buttons in the right-hand column, never above the grid. */
+.light-layout>.light-controls{display:flex!important;grid-column:2!important;grid-row:1!important;align-self:center!important;justify-self:start!important}.light-layout>.light-grid{align-self:center!important}
+/* Final first-load layout: board left, controls right, no wrapping. */
+.light-layout{display:grid!important;grid-template-columns:auto 214px!important;grid-template-rows:auto auto!important;column-gap:14px!important;row-gap:12px!important;justify-content:start!important;align-items:center!important;flex-wrap:nowrap!important;padding:8px!important}
+.light-layout>.light-grid{grid-column:1!important;grid-row:1 / span 2!important;order:0!important}
+.light-layout>.light-controls{grid-column:2!important;grid-row:1!important;order:0!important;align-self:center!important;justify-self:start!important}
+.light-layout>div:first-child{grid-column:2!important;grid-row:2!important;order:0!important}
+/* Center the controls beside the board with only a small breathing gap. */
+.light-layout{column-gap:12px!important}.light-layout>.light-controls{align-self:center!important;position:static!important;margin:0!important}
+/* Dragging follows the pointer exactly; no easing or momentum. */
+.light-grid .light-cell{transition:none!important}
+
+
+.light-cell.shadow{background:#09050d!important;color:#6b2c82!important;box-shadow:inset 0 0 0 1px #2d1640!important}
+.light-cell.block{background:#8f55c7!important;color:#21042e!important;box-shadow:inset 0 0 0 2px #d9b8ff!important}
+.light-cell.block{position:relative!important;font-size:0!important;overflow:hidden!important}.light-cell.block::after{content:"";position:absolute;inset:0;background:#8f55c7;pointer-events:none}.light-cell.block:active::after{background:#8f55c7}
+.placeholder-art{background:#fff!important;color:#000!important;font:700 24px DM Mono;display:flex;align-items:center;justify-content:center;letter-spacing:2px}
+.card-top{position:relative}.wip-label{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:#000;font:700 18px DM Mono;letter-spacing:2px;margin:0}
+.delete-ring{position:absolute;inset:18%;border-radius:50%;background:conic-gradient(rgba(255,255,255,.72) var(--hold,0%),#050509 0);border:2px solid #050509;z-index:8;pointer-events:none}
+.light-cell{position:relative!important}.light-cell .delete-ring{inset:18%!important;width:auto!important;height:auto!important;transform:none!important}
+.light-grid{position:relative!important;overflow:visible!important;isolation:isolate}.light-grid .light-cell{z-index:1}.light-grid .light-cell:active{z-index:20}
+
+
+.light-cell.block.shadow{background:#09050d!important;box-shadow:inset 0 0 0 3px #6b2c82!important}
+
+
+.delete-ring{display:none!important}.light-delete-active{border-color:#d92f3f!important;background:#d92f3f!important;color:#fff!important}
+
+
+#deleteLight.light-delete-active{border-color:#d92f3f!important;background:#d92f3f!important;color:#fff!important;opacity:1!important}
+
+
+.light-trash{border:2px solid #21042e;background:#d9c6ef;color:#21042e;font-size:28px;padding:8px 22px;cursor:pointer}.light-trash:hover{background:#b77ad9}
+.light-trash:hover,.light-trash:focus,.light-trash:active{background:#d9c6ef!important;color:#21042e!important;filter:none!important;transform:none!important;box-shadow:none!important}
+#deleteLight{display:none!important}
+
+
+.pattern-sequence{overflow:visible!important}.motif-mark{position:absolute;height:18px;border-top:6px solid;border-radius:50% 50% 0 0;pointer-events:none;z-index:5}.motif-mark.color{border-color:#159fe0}.motif-mark.shape{border-top:0;border-bottom:6px solid #ed2635;border-radius:0 0 50% 50%}.motif-mark.rotation{border-color:#8f55c7;height:14px}
+
+
+.motif-mark{height:12px!important;border-width:4px!important}.motif-mark.color{top:4px!important}.motif-mark.shape{bottom:4px!important}.motif-mark.rotation{top:0!important}
+
+
+.motif-mark{height:8px!important;border-width:3px!important;border-radius:50%!important}.motif-mark.color{top:1px!important}.motif-mark.shape{bottom:1px!important}.motif-mark.rotation{top:-1px!important}
+.motif-mark{height:16px!important;border-radius:50% 50% 0 0!important}.motif-mark.shape{border-radius:0 0 50% 50%!important}
+
+/* Miniature Light Lock goal map: keep the same visible 7x7 grid structure
+   as the main board while using compact cells. */
+.goal-map{display:grid!important;grid-template-columns:repeat(7,18px)!important;grid-template-rows:repeat(7,18px)!important;gap:0!important;padding:0!important;background:#050509!important;border:2px solid #c79cff!important}
+.goal-map i{display:block!important;width:18px!important;height:18px!important;box-sizing:border-box!important;border:1px solid #a66be0!important;background:#050509!important}
+.goal-map i.goal-on{background:#fff!important}
+
+/* Light Lock solution preview: show the beam as a soft, see-through shine.
+   Blocks stay solid; no obstruction shadow is drawn while the answer is open. */
+.light-grid .light-cell.solution-lit{
+  background:rgba(255,226,92,.42)!important;
+  box-shadow:inset 0 0 16px rgba(255,248,173,.78),0 0 7px rgba(255,226,92,.28)!important;
+  clip-path:polygon(50% 0,100% 100%,0 100%)!important;
+}
+.light-grid .light-cell.solution-lit::after{display:none!important}
+.light-grid .light-cell.solution-lit.shadow{background:rgba(255,226,92,.42)!important;color:inherit!important;box-shadow:inset 0 0 16px rgba(255,248,173,.78)!important}
+
+.light-level-progress{width:min(490px,82vw);margin:0 auto 14px}
+.light-level-progress-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;color:#21042e;font:700 10px DM Mono;letter-spacing:.06em}
+.light-level-progress-track{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;height:12px}
+.light-level-progress-track i{display:block;background:#e5def0;border:2px solid #8f55c7}
+.light-level-progress-track i.filled{background:#8f55c7;box-shadow:inset 0 0 8px rgba(217,184,255,.75)}
+
+/* Keep the Light Lock legend in the far-right side of the white game panel,
+   vertically centered beside the board and controls. */
+.game-shell>.light-legend{
+  position:absolute!important;
+  right:18px!important;
+  left:auto!important;
+  top:50%!important;
+  bottom:auto!important;
+  transform:translateY(-50%)!important;
+  width:145px!important;
+  margin:0!important;
+  text-align:left!important;
+  font:11px/1.6 DM Mono!important;
+  color:#6b2c82!important;
+}
+.game-shell>.light-legend b{display:block;margin-bottom:5px;color:#21042e}
+.light-controls #showLightSolution:disabled{opacity:.5;cursor:not-allowed}
+
