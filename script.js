@@ -188,6 +188,26 @@ renderLight=function(){const lit=lightCells(),target=new Set(lightTarget),same=l
 let lightDrag=null,lightRotations={};
 const previousLightRender=renderLight;renderLight=function(){previousLightRender();const grid=document.querySelector('.light-grid');if(!grid)return;document.querySelectorAll('[data-light]').forEach(cell=>{const key=cell.dataset.light,src=lightSources.findIndex(s=>`${s.r},${s.c}`===key),block=lightBlocks.includes(key);cell.onpointerdown=e=>{if(e.button!==0||src<0&&!block)return;lightDrag={type:src>=0?'sun':'block',index:src>=0?src:key,originX:e.clientX,originY:e.clientY,cell};cell.setPointerCapture?.(e.pointerId)};cell.onpointermove=e=>{if(!lightDrag||lightDrag.cell!==cell)return;cell.style.transform=`translate(${e.clientX-lightDrag.originX}px,${e.clientY-lightDrag.originY}px)`};cell.onpointerup=e=>{if(!lightDrag||lightDrag.cell!==cell)return;const target=document.elementFromPoint(e.clientX,e.clientY)?.closest('[data-light]');cell.style.transform='';if(target){const key2=target.dataset.light;if(lightDrag.type==='sun'&&!lightSources.some((s,i)=>i!==lightDrag.index&&`${s.r},${s.c}`===key2)){const [r,c]=key2.split(',').map(Number);lightSources[lightDrag.index].r=r;lightSources[lightDrag.index].c=c;lightSelected=lightDrag.index}if(lightDrag.type==='block'&&!lightSources.some(s=>`${s.r},${s.c}`===key2)){lightBlocks=lightBlocks.filter(x=>x!==lightDrag.index);lightBlocks.push(key2)}}lightDrag=null;renderLight()}})};
 let lightHover=null;document.addEventListener('pointerover',e=>{const cell=e.target.closest?.('[data-light]');if(cell){const idx=Number(cell.dataset.source);if(idx>=0)lightHover={type:'sun',index:idx};else if(lightBlocks.includes(cell.dataset.light))lightHover={type:'block',index:cell.dataset.light}}});document.addEventListener('keydown',e=>{if(e.key.toLowerCase()!=='r'||!lightHover)return;const id=lightHover.type==='sun'?`${lightSources[lightHover.index].r},${lightSources[lightHover.index].c}`:lightHover.index;lightRotations[id]=((lightRotations[id]||0)+1)%4;toast('ROTATED')});
+// Rotate exactly the sun under the pointer. This capture-phase handler keeps
+// the older selected-sun listener from rotating the wrong source when several
+// suns are present, and updates the real beam direction instead of a visual
+// placeholder rotation map.
+document.addEventListener('keydown',e=>{
+  if(e.key.toLowerCase()!=='r'||!document.querySelector('.light-grid:hover'))return;
+  if(!lightHover||lightHover.type!=='sun'){
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    return;
+  }
+  const source=lightSources[lightHover.index];
+  if(!source){e.preventDefault();e.stopImmediatePropagation();return}
+  source.d=((source.d||0)+1)%8;
+  lightSelected=lightHover.index;
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  renderLight();
+  toast('ROTATED');
+},true);
 document.addEventListener('click',e=>{if(e.target.closest?.('#addSun')){lightPlaceMode=true;lightBlockMode=false}if(e.target.closest?.('#addBlock')){lightBlockMode=true;lightPlaceMode=false}});
 document.addEventListener('pointerup',e=>{if(lightDeleteMode)return;if(suppressNextPlacement){suppressNextPlacement=false;return}if(!lightPlaceMode||lightSources.length>=3)return;const cell=e.target.closest?.('[data-light]');if(!cell)return;const key=cell.dataset.light;if(lightSources.some(s=>`${s.r},${s.c}`===key))return;const [r,c]=key.split(',').map(Number);lightSources.push({r,c,d:0});lightSelected=lightSources.length-1;lightPlaceMode=false;renderLight()});
 document.addEventListener('pointerup',e=>{if(suppressNextPlacement){suppressNextPlacement=false;return}if(lightDeleteMode)return;if(!lightBlockMode)return;const grid=document.querySelector('.light-grid');if(!grid)return;const rect=grid.getBoundingClientRect(),col=Math.max(0,Math.min(6,Math.floor((e.clientX-rect.left)/rect.width*7))),row=Math.max(0,Math.min(6,Math.floor((e.clientY-rect.top)/rect.height*7))),key=`${row},${col}`;if(!lightSources.some(s=>`${s.r},${s.c}`===key)){if(lightBlocks.includes(key))lightBlocks=lightBlocks.filter(x=>x!==key);else if(lightBlocks.length<6)lightBlocks.push(key);renderLight()}});
@@ -259,7 +279,7 @@ lightCells=function(){
       const width=[1,3,5,7][step-1],lo=-Math.floor((width-1)/2),hi=lo+width-1;
       for(let spread=lo;spread<=hi;spread++){
         const r=s.r+Math.round((-step)*co-spread*si),c=s.c+Math.round((-step)*si+spread*co);
-        if(inGrid(r,c)){const key=`${r},${c}`;lit.add(key);sourceBeam.add(key)}
+        if(inGrid(r,c)){const key=`${r},${c}`;sourceBeam.add(key)}
       }
     }
     // Diagonal rasterization can leave enclosed checkerboard holes. Fill
@@ -273,9 +293,12 @@ lightCells=function(){
         for(const [dr,dc] of [[-1,0],[1,0],[0,-1],[0,1]])if(sourceBeam.has(`${r+dr},${c+dc}`))neighbors++;
         if(neighbors>=3)holes.push(key);
       }
-      holes.forEach(key=>{sourceBeam.add(key);lit.add(key)});
+      holes.forEach(key=>sourceBeam.add(key));
     }
-    const beamBeforeBlocks=new Set(lit),[fr,fc]=forwardDirs[o],[sr,sc]=sideDirs[o];
+    // Evaluate obstructions against this sun's beam only. Using the union
+    // from earlier suns made a block lit by one source incorrectly cast a
+    // shadow for every other source.
+    const beamBeforeBlocks=new Set(sourceBeam),sourceShadow=new Set(),[fr,fc]=forwardDirs[o],[sr,sc]=sideDirs[o];
     lightBlocks.forEach(key=>{
       if(!beamBeforeBlocks.has(key))return;
       const [br,bc]=key.split(',').map(Number),vr=br-s.r,vc=bc-s.c;
@@ -288,13 +311,18 @@ lightCells=function(){
         const [er,ec]=forwardDirs[boundary],dr=er-fr,dc=ec-fc;
         for(let offset=0;offset<=depth;offset++){
           const r=br+fr*depth+dr*offset,c=bc+fc*depth+dc*offset;
-          if(inGrid(r,c))shadow.add(`${r},${c}`);
+          if(inGrid(r,c))sourceShadow.add(`${r},${c}`);
         }
       }
     });
+    // A second sun can still illuminate a cell shadowed by this sun, so
+    // remove shadows from each source before combining their visible beams.
+    sourceShadow.forEach(k=>sourceBeam.delete(k));
+    sourceBeam.forEach(k=>lit.add(k));
+    sourceShadow.forEach(k=>shadow.add(k));
   });
-  shadow.forEach(k=>lit.delete(k));
-  lightShadowCells=shadow;
+  // Only expose shadows that remain dark after all suns are combined.
+  lightShadowCells=new Set([...shadow].filter(k=>!lit.has(k)));
   return lit;
 };
 
