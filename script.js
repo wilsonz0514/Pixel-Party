@@ -14,18 +14,38 @@ if(!localStorage.getItem('pixelPartyAllThreePowerupsGrantOct4')){
   localStorage.setItem('pixelPartyInventory',JSON.stringify(inventory));
   localStorage.setItem('pixelPartyAllThreePowerupsGrantOct4','1');
 }
+// One-time local test grant for the Calculator Clash time extender.
+if(!localStorage.getItem('pixelPartyCalculatorTimeTestGrantOct19')){
+  inventory.time=Math.max(1,Number(inventory.time)||0);
+  localStorage.setItem('pixelPartyInventory',JSON.stringify(inventory));
+  localStorage.setItem('pixelPartyCalculatorTimeTestGrantOct19','1');
+}
+// One-time local test grant for the Light Lock Orange Sun powerup.
+if(!localStorage.getItem('pixelPartyOrangeSunTestGrantOct19c')){
+  inventory.orangeSun=Math.max(1,Number(inventory.orangeSun)||0);
+  localStorage.setItem('pixelPartyInventory',JSON.stringify(inventory));
+  localStorage.setItem('pixelPartyOrangeSunTestGrantOct19c','1');
+}
+// One-time local testing grant: provide two uses for every active game's
+// powerup while keeping the inventory account-free and persisted locally.
+if(!localStorage.getItem('pixelPartyTwoPowerupsGrantOct19d')){
+  ['shuffle','remove','clue','time','orangeSun'].forEach(key=>{
+    inventory[key]=Math.max(2,Number(inventory[key])||0);
+  });
+  localStorage.setItem('pixelPartyInventory',JSON.stringify(inventory));
+  localStorage.setItem('pixelPartyTwoPowerupsGrantOct19d','1');
+}
 function saveShop(){localStorage.setItem('pixelPartyCoins',coins);localStorage.setItem('pixelPartyInventory',JSON.stringify(inventory));const el=document.querySelector('#coinCount');if(el)el.textContent=coins}
 function openShop(){showView(shopView);saveShop();document.title='Shop | Pixel Party'}
 function buyItem(item,cost){if((inventory[item]||0)>0){toast('YOU ALREADY OWN THIS ONE-USE ITEM');return}if(coins<cost){toast(`YOU NEED ${cost-coins} MORE COINS`);return}coins-=cost;inventory[item]=1;if(item==='clue'){localStorage.setItem('patternPowerupReady','1');localStorage.setItem('pixelPartyPatternTestKit','1')}saveShop();toast('ITEM PURCHASED — USE IT IN ITS GAME')}
-document.querySelector('#shopButton')?.addEventListener('click',openShop);document.querySelectorAll('.shop-buy').forEach(btn=>btn.onclick=()=>buyItem(btn.dataset.item,{shuffle:500,remove:650,clue:800}[btn.dataset.item]));saveShop();
+document.querySelector('#shopButton')?.addEventListener('click',openShop);document.querySelectorAll('.shop-buy').forEach(btn=>btn.onclick=()=>buyItem(btn.dataset.item,{shuffle:500,remove:650,clue:800,time:950,orangeSun:1000}[btn.dataset.item]));saveShop();
 
 const games={
   merge:{title:'WORD WEAVER',kicker:'GAME 01 / WORD BUILDING',start:startMerge},
   multiples:{title:'MULTIPLE HUNTER',kicker:'GAME 02 / NUMBER SENSE',start:startMultiples},
   pattern:{title:'PATTERN PULSE',kicker:'GAME 03 / LOGIC',start:startPattern}
-  ,sort:{title:'QUICK SORT',kicker:'GAME 04 / NUMBER SPEED',start:startQuickSort}
-  ,color:{title:'COLOR SNAP',kicker:'GAME 05 / REACTION',start:startColorSnap}
-  ,light:{title:'LIGHT LOCK',kicker:'GAME 06 / GRID LOGIC',start:startLightLock}
+  ,sort:{title:'CALCULATOR CLASH',kicker:'GAME 04 / NUMBER LOGIC',start:startCalculatorClash}
+  ,light:{title:'LIGHT LOCK',kicker:'GAME 05 / GRID LOGIC',start:startLightLock}
 };
 document.querySelectorAll('[data-game]').forEach(btn=>btn.addEventListener('click',()=>openGame(btn.dataset.game)));
 document.querySelectorAll('[data-home]').forEach(btn=>btn.addEventListener('click',()=>goHome()));
@@ -42,7 +62,7 @@ function renderMistakes(){let el=document.querySelector('#mistakes');if(!el){el=
 function registerMistake(){mistakes++;renderMistakes();if(mistakes>=3){setTimeout(()=>showLose(),250);return true}return false}
 function showLose(){if(gameWon)return;const lostGame=currentGame,lostWord=lostGame==='merge'?mergeTarget:'';gameWon=true;currentGame=null;document.body.insertAdjacentHTML('beforeend',`<div class="victory-overlay lose-overlay"><section class="victory-bubble"><span class="victory-kicker">RUN OVER</span><h2>YOU LOSE!</h2><p>You used all three mistakes. ${lostWord?`The word was <strong>${lostWord.toUpperCase()}</strong>. `:''}Try again or return to the game room.</p><div class="victory-actions"><button id="closeLose">TRY AGAIN</button><button id="loseHome">GAME ROOM</button></div></section></div>`);document.querySelector('#closeLose').onclick=()=>{document.querySelector('.lose-overlay')?.remove();openGame(lostGame||'merge')};document.querySelector('#loseHome').onclick=()=>{document.querySelector('.lose-overlay')?.remove();goHome()}}
 function toast(msg){const t=document.querySelector('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2100)}
-function shell(instruction,body){gameArea.innerHTML=`<div class="game-shell"><div class="instructions"><b>i</b><span>${instruction}</span></div>${body}</div>`;let strikes=document.querySelector('#mistakes');if(!strikes){renderMistakes();strikes=document.querySelector('#mistakes')}if(strikes)document.querySelector('.game-shell').prepend(strikes);if(currentGame==='merge'){const board=document.querySelector('.merge-board'),candidate=builtWord();board?.insertAdjacentHTML('beforebegin',`<div class="word-slots" aria-label="Word progress">${[...mergeTarget].map((letter,i)=>`<span class="word-slot ${mergeHinted.includes(i)?'hinted':''}">${mergeHinted.includes(i)?mergeTarget[i]:(candidate[i]||'_')}</span>`).join('')}</div>`)}if(currentGame==='merge'&&inventory.shuffle){const actions=document.querySelector('.word-actions');actions?.insertAdjacentHTML('beforeend','<button class="primary" id="shuffleLetters">SHUFFLE TILES</button>');document.querySelector('#shuffleLetters').onclick=()=>{mergeBoard=shuffleWords(mergeBoard);inventory.shuffle=0;saveShop();renderMerge()}}if(currentGame==='multiples'&&inventory.remove){const actions=document.querySelector('#checkMultiples')?.parentElement;actions?.insertAdjacentHTML('beforeend','<button class="primary" id="removeWrong">REMOVE 3 WRONG</button>');document.querySelector('#removeWrong').onclick=()=>{const wrong=[...document.querySelectorAll('[data-num]')].filter(b=>Number(b.textContent)%multipleTarget!==0).slice(0,3);wrong.forEach(b=>b.remove());inventory.remove=0;saveShop()}}if(currentGame==='pattern'&&inventory.clue){const seq=document.querySelector('.pattern-sequence');seq?.insertAdjacentHTML('beforebegin',`<p class="powerup-clue">CLUE: ${buildPattern(patternLevel).slice(0,Math.max(1,Math.floor(patternLevel/4))).map(t=>t.shape).join(' → ')}</p>`);inventory.clue=0;saveShop()}}
+function shell(instruction,body){gameArea.innerHTML=`<div class="game-shell"><div class="instructions"><b>i</b><span>${instruction}</span></div>${body}</div>`;let strikes=document.querySelector('#mistakes');if(!strikes){renderMistakes();strikes=document.querySelector('#mistakes')}if(strikes)document.querySelector('.game-shell').prepend(strikes);if(currentGame==='merge'){const board=document.querySelector('.merge-board'),candidate=builtWord();board?.insertAdjacentHTML('beforebegin',`<div class="word-slots" aria-label="Word progress">${[...mergeTarget].map((letter,i)=>`<span class="word-slot ${mergeHinted.includes(i)?'hinted':''}">${mergeHinted.includes(i)?mergeTarget[i]:(candidate[i]||'_')}</span>`).join('')}</div>`)}if(currentGame==='merge'&&inventory.shuffle){const actions=document.querySelector('.word-actions');actions?.insertAdjacentHTML('beforeend','<button class="primary" id="shuffleLetters">SHUFFLE TILES</button>');document.querySelector('#shuffleLetters').onclick=()=>{mergeBoard=shuffleWords(mergeBoard);inventory.shuffle=0;saveShop();renderMerge()}}if(currentGame==='multiples'&&inventory.remove){const actions=document.querySelector('#checkMultiples')?.parentElement;actions?.insertAdjacentHTML('beforeend','<button class="primary" id="removeWrong">REMOVE 3 WRONG</button>');document.querySelector('#removeWrong').onclick=()=>{removeMultipleWrongAnswers();inventory.remove=Math.max(0,(Number(inventory.remove)||0)-1);saveShop();addPowerupBar()}}}
 function showVictory(gameName,achievement,details=''){
   if(gameWon)return;gameWon=true;currentGame=null;
   const colors=['#eaf238','#ff6534','#5e80ff','#9be073','#f4f0e7'];
@@ -76,6 +96,18 @@ function checkMerge(){const word=builtWord(),needed=mergeLengths[mergeLevel-1];i
 let multipleTarget,multipleNums,multipleSelected,multipleStreak=0,multipleLevel=1,multipleHints=0;
 function startMultiples(){multipleLevel=1;multipleStreak=0;multipleHints=0;newMultipleRound()}
 function newMultipleRound(){const min=2+(multipleLevel-1)*5;multipleTarget=min+Math.floor(Math.random()*8);multipleSelected=[];const factors=shuffleWords([1,2,3,4,5,6,7,8,9,10]).slice(0,4+Math.floor(Math.random()*3));const correct=factors.map(f=>multipleTarget*f);const candidates=[];for(let n=1;n<=multipleTarget*30;n++)if(n%multipleTarget!==0&&!correct.includes(n))candidates.push(n);const decoys=shuffleWords(candidates).slice(0,11);multipleNums=[...correct,...decoys].sort(()=>Math.random()-.5);renderMultiples()}
+function removeMultipleWrongAnswers(){
+  if(!Array.isArray(multipleNums)||!multipleNums.length)return;
+  const removed=new Set();
+  for(let i=0;i<multipleNums.length&&removed.size<3;i++){
+    if(multipleNums[i]%multipleTarget!==0)removed.add(i);
+  }
+  if(!removed.size)return;
+  const selectedValues=new Set(multipleSelected.filter(index=>!removed.has(index)).map(index=>multipleNums[index]));
+  multipleNums=multipleNums.filter((_,index)=>!removed.has(index));
+  multipleSelected=multipleNums.map((number,index)=>selectedValues.has(number)?index:-1).filter(index=>index>=0);
+  renderMultiples();
+}
 function renderMultiples(){const progress=multipleLevel*10,neededCount=multipleNums.filter(n=>n%multipleTarget===0).length,freeHints=Math.max(0,3-multipleHints);shell('Clear 10 rounds. Each round uses a larger randomized target.',`<div class="game-status"><div><h3>FIND MULTIPLES OF <span style="color:var(--orange)">${multipleTarget}</span></h3><p>SEARCHING FOR ${neededCount} MULTIPLES</p></div><p>${multipleSelected.length} SELECTED</p></div><div class="run-progress"><div class="run-progress-head"><span>LEVEL ${multipleLevel}</span><b>${progress}% COMPLETE</b><span>LEVEL 10</span></div><div class="run-progress-track"><div class="run-progress-fill" style="--progress:${progress}%"></div></div></div><div class="number-grid">${multipleNums.map((n,i)=>`<button class="number-choice ${multipleSelected.includes(i)?'selected':''}" data-num="${i}">${n}</button>`).join('')}</div><div style="text-align:center;margin-top:20px"><button id="checkMultiples" class="primary">CHECK PICKS</button><button id="multipleHint" class="primary hint-button">HINTS (${freeHints} REMAINING)</button></div>`);document.querySelectorAll('[data-num]').forEach(b=>b.onclick=()=>{const i=+b.dataset.num;multipleSelected=multipleSelected.includes(i)?multipleSelected.filter(x=>x!==i):[...multipleSelected,i];renderMultiples()});document.querySelector('#checkMultiples').onclick=checkMultiples;document.querySelector('#multipleHint').onclick=useMultipleHint}
 function useMultipleHint(){const available=multipleNums.map((n,i)=>n%multipleTarget===0&&!multipleSelected.includes(i)?i:-1).filter(i=>i>=0);if(!available.length)return;if(multipleHints>=3&&registerMistake())return;multipleSelected.push(available[Math.floor(Math.random()*available.length)]);multipleHints++;toast(multipleHints<=3?'HINT USED':'HINT USED — STRIKE');renderMultiples()}
 function checkMultiples(){const right=multipleNums.map((n,i)=>n%multipleTarget===0?i:-1).filter(i=>i>=0);const perfect=right.length===multipleSelected.length&&right.every(i=>multipleSelected.includes(i));if(perfect){multipleStreak++;score+=right.length*10+multipleLevel*5;updateScore();if(multipleLevel>=10){setTimeout(()=>currentGame==='multiples'&&showVictory('MULTIPLE HUNTER','You cleared all 10 increasingly difficult hunts!'),400)}else{multipleLevel++;setTimeout(()=>currentGame==='multiples'&&newMultipleRound(),650)}}else{multipleStreak=0;if(registerMistake())return;score=Math.max(0,score-5);updateScore();toast('NOT QUITE — TRY THIS LEVEL AGAIN')}}
@@ -103,18 +135,36 @@ function newPattern(){const seq=buildPattern(patternLevel);patternAnswer=seq[seq
 function checkPattern(choice){if(tokenKey(patternOptions[choice])===tokenKey(patternAnswer)){const completed=patternLevel;score+=completed*10;updateScore();if(completed>=25){setTimeout(()=>currentGame==='pattern'&&showVictory('PATTERN PULSE','You mastered all 25 visual patterns!'),400)}else{patternLevel++;setTimeout(()=>currentGame==='pattern'&&newPattern(),500)}}else{if(registerMistake())return;score=Math.max(0,score-5);updateScore();toast('LOOK AGAIN — CHECK EVERY PROPERTY')}}
 
 const checkMultiplesWithEmptyGuard=checkMultiples;checkMultiples=function(){if(!multipleSelected.length){toast(`YOU NEED TO SELECT ${multipleNums.filter(n=>n%multipleTarget===0).length} NUMBERS`);return}return checkMultiplesWithEmptyGuard()};
-let sortRound=1,sortNumbers=[],sortPicked=[];
-function startQuickSort(){sortRound=1;sortPicked=[];newSortRound()}
-function newSortRound(){sortPicked=[];sortNumbers=shuffleWords(Array.from({length:6},()=>Math.floor(Math.random()*89)+10));renderSort()}
-function renderSort(){const target=[...sortNumbers].sort((a,b)=>a-b);shell('Tap the numbers from smallest to largest. Three mistakes ends the run.',`<div class="game-status"><h3>ROUND ${sortRound} / 8</h3><p>SMALLEST TO LARGEST</p></div><div class="number-grid sort-grid">${sortNumbers.map((n,i)=>`<button class="number-choice ${sortPicked.includes(i)?'selected':''}" data-sort="${i}">${n}</button>`).join('')}</div><p class="dictionary-note">PICK THE NEXT LOWEST NUMBER</p>`);document.querySelectorAll('[data-sort]').forEach(b=>b.onclick=()=>{const i=+b.dataset.sort,next=target[sortPicked.length];if(sortNumbers[i]!==next){if(registerMistake())return;toast('NOT THE NEXT LOWEST NUMBER');return}sortPicked.push(i);if(sortPicked.length===sortNumbers.length){score+=sortRound*15;updateScore();if(sortRound>=8)setTimeout(()=>showVictory('QUICK SORT','You ordered every round at speed!'),300);else{sortRound++;setTimeout(newSortRound,350)}}else renderSort()})}
+let calculatorLevel=1,calculatorPuzzle=null,calculatorCounts=[0,0,0],calculatorTimeLeft=15,calculatorTimer=null;
+function calculatorInt(min,max){return Math.floor(Math.random()*(max-min+1))+min}
+function calculatorApply(total,op){return op.kind==='+'?total+op.value:op.kind==='-'?total-op.value:total*op.value}
+function createCalculatorPuzzle(level){
+  const max=level<=2?9:level<=5?16:level<=8?28:45;
+  for(let attempt=0;attempt<160;attempt++){
+    const addValue=calculatorInt(4,max),subtractValue=calculatorInt(1,Math.max(1,addValue-1));
+    const thirdKind=level<4?'+':level<7?(Math.random()<.55?'×':'+'):'×';
+    const ops=[{kind:'+',value:addValue},{kind:'-',value:subtractValue},{kind:thirdKind,value:thirdKind==='×'?calculatorInt(2,level>=8?4:3):calculatorInt(2,max)}];
+    const counts=level===1?[1,1,1]:[1+calculatorInt(0,level>=5?2:1),1+calculatorInt(0,level>=3?2:1),1+((thirdKind==='×')?0:calculatorInt(0,level>=4?2:1))];
+    let target=0;const solution=[];
+    counts.forEach((count,index)=>{for(let n=0;n<count;n++){solution.push(index);target=calculatorApply(target,ops[index])}});
+    if(Number.isInteger(target)&&target>0&&target<=400){const slots=shuffleWords([0,1,2,3,4,5,6,7,8,9]).slice(0,3);return{current:0,target,ops,slots}}
+  }
+  const ops=[{kind:'+',value:6},{kind:'-',value:2},{kind:'+',value:10}];return{current:0,target:14,ops,slots:[1,4,7]}
+}
+function stopCalculatorTimer(){if(calculatorTimer){clearInterval(calculatorTimer);calculatorTimer=null}}
+function startCalculatorLevel(){stopCalculatorTimer();calculatorPuzzle=createCalculatorPuzzle(calculatorLevel);calculatorCounts=[0,0,0];calculatorTimeLeft=15;renderCalculator();calculatorTimer=setInterval(()=>{if(currentGame!=='sort'){stopCalculatorTimer();return}calculatorTimeLeft--;if(calculatorTimeLeft<=0){stopCalculatorTimer();if(registerMistake())return;toast('TIME UP — TRY THIS LEVEL AGAIN');setTimeout(()=>currentGame==='sort'&&startCalculatorLevel(),650)}else renderCalculator()},1000)}
+function startCalculatorClash(){calculatorLevel=1;startCalculatorLevel()}
+function renderCalculator(){
+  const p=calculatorPuzzle,used=calculatorCounts.filter(count=>count>0).length;
+  shell('Reach the goal using the three live keys. You can press a live key more than once; blank keys are inactive.',`<div class="game-status"><div><h3>LEVEL ${calculatorLevel} / 10</h3><p>BUILD THE TARGET</p></div><p>${used} / 3 KEY TYPES USED · ${calculatorTimeLeft}s</p></div><div class="run-progress"><div class="run-progress-head"><span>LEVEL ${calculatorLevel}</span><b>${Math.round((calculatorLevel-1)/10*100)}% COMPLETE</b><span>LEVEL 10</span></div><div class="run-progress-track"><div class="run-progress-fill" style="--progress:${Math.round((calculatorLevel-1)/10*100)}%"></div></div></div><div class="calculator-panel"><div class="calculator-screen"><div><small>CURRENT TOTAL</small><strong>${p.current}</strong></div><div><small>GOAL</small><b>${p.target}</b></div></div><div class="calculator-timer"><span>TIME LEFT</span><strong>${calculatorTimeLeft}s</strong></div><div class="calculator-pad">${Array.from({length:10},(_,digit)=>{const oi=p.slots.indexOf(digit),op=oi>=0?p.ops[oi]:null,count=oi>=0?calculatorCounts[oi]:0;return`<button class="calculator-key ${op?'live':''} ${count?'used':''}" data-calculator-key="${digit}" ${op?'':'disabled'} aria-label="${op?`${op.kind}${op.value}`:'empty key'}">${op?`<span>${op.kind}${op.value}</span><small>${count?`USED ${count}×`:''}</small>`:'&nbsp;'}</button>`}).join('')}</div><p class="calculator-hint">Some levels need repeated moves. Use every live key at least once, in any order, before the timer hits zero.</p></div>`);
+  document.querySelectorAll('[data-calculator-key]').forEach(button=>button.onclick=()=>{const digit=Number(button.dataset.calculatorKey),oi=p.slots.indexOf(digit);if(oi<0)return;calculatorCounts[oi]++;p.current=calculatorApply(p.current,p.ops[oi]);const usedNow=calculatorCounts.filter(count=>count>0).length;if(p.current===p.target){if(usedNow<3){toast('GOAL REACHED — USE EACH LIVE KEY ONCE');renderCalculator();return}stopCalculatorTimer();score+=calculatorLevel*20;updateScore();renderCalculator();setTimeout(()=>{if(currentGame!=='sort')return;if(calculatorLevel>=10)showVictory('CALCULATOR CLASH','You solved all 10 calculator challenges!');else{calculatorLevel++;startCalculatorLevel()}},400);return}renderCalculator()});
+  document.onkeydown=e=>{if(currentGame!=='sort'||!/^\d$/.test(e.key))return;const button=document.querySelector(`[data-calculator-key="${e.key}"]`);if(button&&!button.disabled){e.preventDefault();button.click()}};
+}
 let equationAnswer=0,equationRound=1;
 function startEquationDash(){equationRound=1;newEquation()}
 function newEquation(){const a=Math.floor(Math.random()*12)+2,b=Math.floor(Math.random()*12)+1,add=Math.random()>.5;equationAnswer=add?a:b+a;const prompt=add?`x + ${b} = ${equationAnswer}`:`x − ${b} = ${equationAnswer}`;shell('Solve for x. Type the answer and press Enter.',`<div class="game-status"><h3>ROUND ${equationRound} / 8</h3><p>${prompt}</p></div><div class="merge-answer"><input id="equationInput" inputmode="numeric" autocomplete="off" aria-label="Answer"><button class="primary" id="equationCheck">CHECK</button></div><p class="dictionary-note">FAST ANSWERS EARN MORE POINTS</p>`);const check=()=>{const value=Number(document.querySelector('#equationInput').value);if(value!==equationAnswer){if(registerMistake())return;toast('NOT QUITE — TRY AGAIN');return}score+=equationRound*12;updateScore();if(equationRound>=8)setTimeout(()=>showVictory('EQUATION DASH','You solved every equation!'),300);else{equationRound++;setTimeout(newEquation,350)}};document.querySelector('#equationCheck').onclick=check;document.querySelector('#equationInput').onkeydown=e=>{if(e.key==='Enter')check()};document.querySelector('#equationInput').focus()}
 function newEquation(){const a=Math.floor(Math.random()*12)+2,b=Math.floor(Math.random()*12)+1,add=Math.random()>.5;equationAnswer=add?a:b+a;const prompt=add?`x + ${b} = ${equationAnswer}`:`x − ${b} = ${equationAnswer}`;shell('Solve for x. Type the answer and press Enter.',`<div class="game-status"><h3>ROUND ${equationRound} / 8</h3><p>${prompt}</p></div><div class="merge-answer"><input id="equationInput" inputmode="numeric" autocomplete="off" aria-label="Answer"><button class="primary" id="equationCheck">CHECK</button></div><p class="dictionary-note">FAST ANSWERS EARN MORE POINTS</p>`);const check=()=>{const value=Number(document.querySelector('#equationInput').value);if(value!==equationAnswer){if(registerMistake())return;toast('NOT QUITE — TRY AGAIN');return}score+=equationRound*12;updateScore();if(equationRound>=8)setTimeout(()=>showVictory('EQUATION DASH','You solved every equation!'),300);else{equationRound++;setTimeout(newEquation,350)}};document.querySelector('#equationCheck').onclick=check;document.querySelector('#equationInput').onkeydown=e=>{if(e.key==='Enter')check()};document.querySelector('#equationInput').focus()}
-let colorRound=1,colorAnswer='';const colorChoices=['CORAL','LIME','VIOLET','SKY'];
-function startColorSnap(){colorRound=1;newColorRound()}
-function newColorRound(){colorAnswer=colorChoices[Math.floor(Math.random()*colorChoices.length)];const options=shuffleWords(colorChoices);shell('Tap the color named by the prompt before the choices shift.',`<div class="game-status"><h3>ROUND ${colorRound} / 8</h3><p>FIND <strong>${colorAnswer}</strong></p></div><div class="pattern-options color-options">${options.map(c=>`<button class="pattern-option" data-color="${c}" style="background:${c==='CORAL'?'#ff8066':c==='LIME'?'#b8e35b':c==='VIOLET'?'#b47be8':'#72c9ed'}">${c}</button>`).join('')}</div>`);document.querySelectorAll('[data-color]').forEach(b=>b.onclick=()=>{if(b.dataset.color!==colorAnswer){if(registerMistake())return;toast('WRONG COLOR — WATCH THE PROMPT');return}score+=colorRound*10;updateScore();if(colorRound>=8)setTimeout(()=>showVictory('COLOR SNAP','You snapped every color cue!'),300);else{colorRound++;setTimeout(newColorRound,300)}})}
-const lightSize=7;let lightBlocks=[],lightSources=[],lightTarget=[],lightPlaceMode=false,lightSelected=0,lightShadowCells=new Set();
+const lightSize=7;let lightBlocks=[],lightSources=[],lightTarget=[],lightPlaceMode=false,lightSelected=0,lightShadowCells=new Set(),lightOrangeCells=new Set();
 let lightLevel=1,lightLevelsCompleted=0,lightFreeSolutionUsed=false;
 // Keep the generated answer separate from the player's editable board so
 // Light Lock can reveal the solution without destroying the current attempt.
@@ -177,16 +227,16 @@ const wordWeaverRender=renderMerge;
 renderMerge=function(){wordWeaverRender();if(currentGame==='merge'){document.querySelectorAll('.word-slot').forEach((slot,i)=>{slot.textContent=placedLetters()[i]||'';slot.classList.toggle('hinted',mergeHinted.includes(i))})}};
 function addPowerupBar(){document.querySelector('.powerup-bar')?.remove();const key={merge:'shuffle',multiples:'remove',pattern:'clue'}[currentGame];if(!key)return;const testClue=key==='clue'&&localStorage.getItem('pixelPartyPatternTestKit');const count=inventory[key]|| (testClue?1:0),bar=document.createElement('div');bar.className=`powerup-bar ${count?'available':'empty'}`;bar.innerHTML=`<button class="powerup-use" type="button">USE POWERUP <span>(${count} AVAILABLE)</span></button>`;document.querySelector('.game-shell')?.append(bar);bar.querySelector('button').onclick=()=>{if(!count){toast('NO POWERUP AVAILABLE — VISIT THE SHOP');return}if(key==='pattern'){const seq=document.querySelector('.pattern-sequence');if(seq&&!document.querySelector('.pattern-motif-clue')){const motif=buildPattern(patternLevel).slice(0,Math.min(3,Math.max(2,Math.floor(patternLevel/3))));seq.insertAdjacentHTML('beforebegin',`<div class="pattern-motif-clue">⌒ ${motif.map(t=>t.shape).join(' · ')} REPEATING MOTIF ⌒</div>`);inventory.clue=0;saveShop();if(testClue){inventory.clue=1;saveShop()}addPowerupBar()}return}if(key==='remove'){const wrong=[...document.querySelectorAll('[data-num]')].filter(b=>Number(b.textContent)%multipleTarget!==0).slice(0,3);wrong.forEach(b=>b.remove());inventory.remove=0;saveShop();addPowerupBar();return}document.querySelector('#shuffleLetters')?.click()||toast('POWERUP READY')};}
 const originalShell=shell;shell=function(instruction,body){originalShell(instruction,body);addPowerupBar()};addPowerupBar();
-addPowerupBar=function(){document.querySelector('.powerup-bar')?.remove();const key={merge:'shuffle',multiples:'remove',pattern:'clue'}[currentGame];if(!key)return;const testClue=key==='clue'&&localStorage.getItem('pixelPartyPatternTestKit'),count=inventory[key]||(testClue?1:0),bar=document.createElement('div');bar.className=`powerup-bar ${count?'available':'empty'}`;bar.innerHTML=`<button class="powerup-use" type="button">USE POWERUP <span>(${count} AVAILABLE)</span></button>`;document.querySelector('.game-shell')?.append(bar);bar.querySelector('button').onclick=()=>{if(!count){toast('NO POWERUP AVAILABLE — VISIT THE SHOP');return}if(key==='pattern'){const seq=document.querySelector('.pattern-sequence');if(!seq){toast('OPEN THE PATTERN BOARD TO USE THIS POWERUP');return}document.querySelector('.pattern-motif-clue')?.remove();const motif=buildPattern(patternLevel).slice(0,3);seq.insertAdjacentHTML('beforebegin',`<div class="pattern-motif-clue">⌒ ${motif.map(t=>t.shape).join(' · ')} REPEATING MOTIF ⌒</div>`);if(!testClue){inventory.clue=0;saveShop()}return}if(key==='remove'){[...document.querySelectorAll('[data-num]')].filter(b=>Number(b.textContent)%multipleTarget!==0).slice(0,3).forEach(b=>b.remove());inventory.remove=0;saveShop();return}document.querySelector('#shuffleLetters')?.click()||toast('POWERUP READY')}};addPowerupBar();
+addPowerupBar=function(){document.querySelector('.powerup-bar')?.remove();const key={merge:'shuffle',multiples:'remove',pattern:'clue',sort:'time',light:'orangeSun'}[currentGame];if(!key)return;const testClue=key==='clue'&&localStorage.getItem('pixelPartyPatternTestKit'),count=Number(inventory[key]||(testClue?1:0)),bar=document.createElement('div');bar.className=`powerup-bar ${count?'available':'empty'}`;bar.innerHTML=`<button class="powerup-use" type="button">USE POWERUP <span>(${count} AVAILABLE)</span></button>`;document.querySelector('.game-shell')?.append(bar);bar.querySelector('button').onclick=()=>{if(!count){toast('NO POWERUP AVAILABLE — VISIT THE SHOP');return}if(key==='time'){calculatorTimeLeft+=15;inventory.time=0;saveShop();toast('15 SECONDS ADDED — KEEP GOING');renderCalculator();return}if(key==='orangeSun'){const occupied=new Set([...lightSources.map(source=>`${source.r},${source.c}`),...lightBlocks]);const preferred=lightTarget.filter(cell=>!occupied.has(cell));const candidates=preferred.length?preferred:Array.from({length:lightSize*lightSize},(_,i)=>`${Math.floor(i/lightSize)},${i%lightSize}`).filter(cell=>!occupied.has(cell));if(!candidates.length){toast('NO EMPTY CELL FOR ORANGE SUN');return}const chosen=candidates[0],[r,c]=chosen.split(',').map(Number);lightSources.push({r,c,d:0,orange:true,locked:true});lightSelected=lightSources.length-1;inventory.orangeSun=0;saveShop();toast('ORANGE SUN ADDED — IT STAYS IN PLACE');renderLight();return}if(key==='pattern'){const seq=document.querySelector('.pattern-sequence');if(!seq){toast('OPEN THE PATTERN BOARD TO USE THIS POWERUP');return}document.querySelector('.pattern-motif-clue')?.remove();const motif=buildPattern(patternLevel).slice(0,3);seq.insertAdjacentHTML('beforebegin',`<div class="pattern-motif-clue">⌒ ${motif.map(t=>t.shape).join(' · ')} REPEATING MOTIF ⌒</div>`);if(!testClue){inventory.clue=0;saveShop()}return}if(key==='remove'){removeMultipleWrongAnswers();inventory.remove=Math.max(0,(Number(inventory.remove)||0)-1);saveShop();addPowerupBar();return}document.querySelector('#shuffleLetters')?.click()||toast('POWERUP READY')}};addPowerupBar();
 document.addEventListener('click',e=>{if(!e.target.closest('.powerup-use')||currentGame!=='pattern')return;const seq=document.querySelector('.pattern-sequence');if(!seq)return;document.querySelector('.pattern-motif-clue')?.remove();const motif=buildPattern(patternLevel).slice(0,3);seq.insertAdjacentHTML('beforebegin',`<div class="pattern-motif-clue">⌒ ${motif.map(t=>t.shape).join(' · ')} REPEATING MOTIF ⌒</div>`);toast('PATTERN MOTIF REVEALED')});
 function showCleanPatternMotif(){const seq=document.querySelector('.pattern-sequence');if(!seq)return;document.querySelectorAll('.motif-mark').forEach(el=>el.remove());const items=[...seq.querySelectorAll('.pattern-symbol')].filter(el=>!el.classList.contains('missing'));if(items.length<4)return;const vals=buildPattern(patternLevel).slice(0,items.length),add=(type,period,pos)=>{if(period<2)return;for(let start=0;start+period-1<items.length;start+=period){const first=items[start],last=items[Math.min(start+period-1,items.length-1)],m=document.createElement('i');m.className=`motif-mark ${type}`;m.style.left=`${first.offsetLeft}px`;m.style.width=`${last.offsetLeft+last.offsetWidth-first.offsetLeft}px`;m.style[pos]=type==='rotation'?'-28px':pos==='top'?'-3px':'auto';if(pos==='bottom')m.style.bottom='-8px';seq.append(m)}};const periodOf=key=>{for(let p=2;p<=5;p++){let ok=true;for(let i=p;i<vals.length;i++)if(vals[i][key]!==vals[i%p][key])ok=false;if(ok)return p}return 0};const sp=periodOf('shape'),cp=periodOf('color'),rp=periodOf('rotation');const changes=k=>new Set(vals.map(v=>String(v[k]))).size>1;if(changes('color')&&cp)add('color',cp,'top');if(changes('shape')&&sp)add('shape',sp,'bottom');if(changes('rotation')&&rp&&rp!==cp&&rp!==sp)add('rotation',rp,'top')}document.addEventListener('click',e=>{if(e.target.closest('.powerup-use')&&currentGame==='pattern'){setTimeout(showCleanPatternMotif,0)}});
-document.addEventListener('click',e=>{if(!e.target.closest('.powerup-use'))return;setTimeout(()=>{const key={merge:'shuffle',multiples:'remove',pattern:'clue'}[currentGame];if(key){inventory[key]=0;if(key==='clue')localStorage.removeItem('pixelPartyPatternTestKit');saveShop();addPowerupBar()}},25)});
+document.addEventListener('click',e=>{if(!e.target.closest('.powerup-use'))return;setTimeout(()=>{const key={merge:'shuffle',multiples:'remove',pattern:'clue',sort:'time'}[currentGame];if(key){if(key!=='remove')inventory[key]=0;if(key==='clue')localStorage.removeItem('pixelPartyPatternTestKit');saveShop();addPowerupBar()}},25)});
 renderLight=function(){const lit=lightCells(),target=new Set(lightTarget),same=lit.size===target.size&&[...lit].every(x=>target.has(x));shell('Match the white goal map. The original sun is fixed; place extra suns and blocks to shape the beam.',`<div class="game-status"><div><h3>LIGHT LOCK</h3><p>Goal map: white tiles are lit, dark tiles stay dark.</p></div><p>${same?'MATCHED':'SHAPE THE BEAM'}</p></div><div class="light-layout"><div><p class="goal-label">GOAL MAP</p><div class="goal-map">${Array.from({length:49},(_,i)=>{const k=`${Math.floor(i/7)},${i%7}`;return `<i class="${target.has(k)?'goal-on':''}"></i>`}).join('')}</div></div><div class="light-grid">${Array.from({length:49},(_,i)=>{const r=Math.floor(i/7),c=i%7,key=`${r},${c}`,src=lightSources.find(s=>s.r===r&&s.c===c);return `<button class="light-cell ${lit.has(key)?'lit':''} ${target.has(key)?'target':''} ${lightBlocks.includes(key)?'block':''}" data-light="${key}">${src?'☀':lightBlocks.includes(key)?'■':''}</button>`}).join('')}</div><div class="light-controls"><button class="primary" id="placeLight">PLACE SUN</button><button class="primary" id="rotateLight">ROTATE SELECTED SUN</button><button class="primary" id="checkLight">CHECK SILHOUETTE</button><p>BLOCKS LEFT: ${4-lightBlocks.length} · SUNS LEFT: ${Math.max(0,2-(lightSources.length-1))}</p></div></div>`);document.querySelectorAll('[data-light]').forEach(b=>b.onclick=()=>{const key=b.dataset.light;if(lightPlaceMode&&!lightSources.some(s=>`${s.r},${s.c}`===key)&&lightSources.length<3){const [r,c]=key.split(',').map(Number);lightSources.push({r,c,d:0});lightSelected=lightSources.length-1;lightPlaceMode=false;renderLight();return}if(lightSources.some(s=>`${s.r},${s.c}`===key))return;if(lightBlocks.includes(key))lightBlocks=lightBlocks.filter(x=>x!==key);else if(lightBlocks.length<4)lightBlocks.push(key);renderLight()});document.querySelector('#placeLight').onclick=()=>{lightPlaceMode=true;toast('CLICK AN EMPTY CUBE TO PLACE A SUN')};document.querySelector('#rotateLight').onclick=()=>{if(lightSources.length>1){lightSelected=lightSelected===0?1:lightSelected;lightSources[lightSelected].d=(lightSources[lightSelected].d+1)%8;renderLight()}else toast('PLACE AN EXTRA SUN FIRST')};document.querySelector('#checkLight').onclick=()=>{if(same){score+=100;updateScore();showVictory('LIGHT LOCK','You matched the illuminated beams to the goal map!')}else if(registerMistake())return;else toast('LIGHT SPILLS OUTSIDE THE GOAL — ADJUST THE CUBES')}};
 renderLight=function(){const lit=lightCells(),target=new Set(lightTarget),same=lit.size===target.size&&[...lit].every(x=>target.has(x));shell('Match the white goal map. Add suns and drag them across the grid to shape their solid triangular light.',`<div class="game-status"><div><h3>LIGHT LOCK</h3><p>White goal cells should be lit; black goal cells should stay dark.</p></div><p>${same?'MATCHED':'SHAPE THE BEAM'}</p></div><div class="light-layout"><div><p class="goal-label">GOAL MAP</p><div class="goal-map">${Array.from({length:49},(_,i)=>{const k=`${Math.floor(i/7)},${i%7}`;return `<i class="${target.has(k)?'goal-on':''}"></i>`}).join('')}</div></div><div class="light-grid">${Array.from({length:49},(_,i)=>{const r=Math.floor(i/7),c=i%7,key=`${r},${c}`,src=lightSources.find(s=>s.r===r&&s.c===c);return `<button class="light-cell ${lit.has(key)?'lit':''} ${target.has(key)?'target':''}" data-light="${key}" ${src&&!src.fixed?'draggable="true"':''}>${src?'☀':''}</button>`}).join('')}</div><div class="light-controls"><button class="primary" id="addSun">ADD SUN</button><button class="primary" id="addBlock" disabled>ADD BLOCK</button><button class="primary" id="rotateLight">ROTATE SELECTED SUN</button><button class="primary" id="checkLight">CHECK SILHOUETTE</button><p>EXTRA SUNS LEFT: ${Math.max(0,2-(lightSources.length-1))}</p></div></div>`);let placing=false,dragIndex=-1;document.querySelector('#addSun').onclick=()=>{placing=true;toast('CLICK A CUBE TO PLACE A SUN')};document.querySelectorAll('[data-light]').forEach(b=>{b.onpointerdown=()=>{const key=b.dataset.light;const idx=lightSources.findIndex(s=>`${s.r},${s.c}`===key);if(idx>0)dragIndex=idx};b.onpointerup=()=>{const key=b.dataset.light;if(placing&&lightSources.length<3&&!lightSources.some(s=>`${s.r},${s.c}`===key)){const [r,c]=key.split(',').map(Number);lightSources.push({r,c,d:0});lightSelected=lightSources.length-1;placing=false;renderLight();return}if(dragIndex>0&&!lightSources.some((s,i)=>i!==dragIndex&&`${s.r},${s.c}`===key)){const [r,c]=key.split(',').map(Number);lightSources[dragIndex].r=r;lightSources[dragIndex].c=c;lightSelected=dragIndex;dragIndex=-1;renderLight()}}});document.querySelector('#rotateLight').onclick=()=>{if(lightSources.length>1){lightSelected=Math.max(1,lightSelected);lightSources[lightSelected].d=(lightSources[lightSelected].d+1)%8;renderLight()}else toast('ADD AN EXTRA SUN FIRST')};document.querySelector('#checkLight').onclick=()=>{if(same){score+=100;updateScore();showVictory('LIGHT LOCK','You matched the beams to the goal map!')}else if(registerMistake())return;else toast('LIGHT SPILLS OUTSIDE THE GOAL — ADJUST THE SUNS')}};
 let lightBlockMode=false,suppressNextPlacement=false,lightDeleteMode=false;
 renderLight=function(){const lit=lightCells(),target=new Set(lightTarget),same=lit.size===target.size&&[...lit].every(x=>target.has(x));shell('Match the goal map. Add suns and blocks, then shape the beams.',`<div class="game-status"><div><h3>LIGHT LOCK</h3><p>White goal cells should be lit; black cells should stay dark.</p></div><p>${same?'MATCHED':'SHAPE THE BEAM'}</p></div><div class="light-layout"><div><p class="goal-label">GOAL MAP</p><div class="goal-map">${Array.from({length:49},(_,i)=>{const k=`${Math.floor(i/7)},${i%7}`;return `<i class="${target.has(k)?'goal-on':''}"></i>`}).join('')}</div></div><div class="light-grid">${Array.from({length:49},(_,i)=>{const r=Math.floor(i/7),c=i%7,key=`${r},${c}`,src=lightSources.find(s=>s.r===r&&s.c===c);return `<button class="light-cell ${lit.has(key)?'lit':''} ${target.has(key)?'target':''} ${lightBlocks.includes(key)?'block':''}" data-light="${key}" data-source="${src?lightSources.indexOf(src):-1}">${src?'☀':lightBlocks.includes(key)?'■':''}</button>`}).join('')}</div><div class="light-controls"><button class="primary" id="addSun">ADD SUN</button><button class="primary" id="addBlock">ADD BLOCK</button><button class="primary" id="checkLight">CHECK SILHOUETTE</button><p class="light-legend"><b>LEGEND</b><br>Hover over a movable sun and press <strong>R</strong> to rotate.<br>Click a block or extra sun to delete it.</p></div></div>`);let placingSun=false;document.querySelector('#addSun').onclick=()=>{placingSun=true;lightBlockMode=false;toast('CLICK A CUBE TO PLACE A SUN')};document.querySelector('#addBlock').onclick=()=>{lightBlockMode=true;placingSun=false;toast('CLICK CUBES TO PLACE BLOCKS')};document.querySelectorAll('[data-light]').forEach(b=>{b.onpointerup=()=>{const key=b.dataset.light,idx=Number(b.dataset.source);if(idx>=0){lightSources.splice(idx,1);lightSelected=Math.max(1,lightSelected-1);renderLight();return}if(placingSun&&lightSources.length<3&&!lightSources.some(s=>`${s.r},${s.c}`===key)){const [r,c]=key.split(',').map(Number);lightSources.push({r,c,d:0});lightSelected=lightSources.length-1;placingSun=false;renderLight();return}if(lightBlockMode){if(lightBlocks.includes(key))lightBlocks=lightBlocks.filter(x=>x!==key);else if(lightBlocks.length<6&&!lightSources.some(s=>`${s.r},${s.c}`===key))lightBlocks.push(key);renderLight()}};b.onmouseenter=()=>{const idx=Number(b.dataset.source);if(idx>0)lightSelected=idx}});document.onkeydown=e=>{if(e.key.toLowerCase()==='r'&&document.querySelector('.light-grid:hover')&&lightSources[lightSelected]&&!lightSources[lightSelected].fixed){lightSources[lightSelected].d=(lightSources[lightSelected].d+1)%8;renderLight()}};document.querySelector('#checkLight').onclick=()=>{if(same){score+=100;updateScore();showVictory('LIGHT LOCK','You matched the beams to the goal map!')}else if(registerMistake())return;else toast('LIGHT SPILLS OUTSIDE THE GOAL — ADJUST THE SUNS OR BLOCKS')}};
 let lightDrag=null,lightRotations={};
-const previousLightRender=renderLight;renderLight=function(){previousLightRender();const grid=document.querySelector('.light-grid');if(!grid)return;document.querySelectorAll('[data-light]').forEach(cell=>{const key=cell.dataset.light,src=lightSources.findIndex(s=>`${s.r},${s.c}`===key),block=lightBlocks.includes(key);cell.onpointerdown=e=>{if(e.button!==0||src<0&&!block)return;lightDrag={type:src>=0?'sun':'block',index:src>=0?src:key,originX:e.clientX,originY:e.clientY,cell};cell.setPointerCapture?.(e.pointerId)};cell.onpointermove=e=>{if(!lightDrag||lightDrag.cell!==cell)return;cell.style.transform=`translate(${e.clientX-lightDrag.originX}px,${e.clientY-lightDrag.originY}px)`};cell.onpointerup=e=>{if(!lightDrag||lightDrag.cell!==cell)return;const target=document.elementFromPoint(e.clientX,e.clientY)?.closest('[data-light]');cell.style.transform='';if(target){const key2=target.dataset.light;if(lightDrag.type==='sun'&&!lightSources.some((s,i)=>i!==lightDrag.index&&`${s.r},${s.c}`===key2)){const [r,c]=key2.split(',').map(Number);lightSources[lightDrag.index].r=r;lightSources[lightDrag.index].c=c;lightSelected=lightDrag.index}if(lightDrag.type==='block'&&!lightSources.some(s=>`${s.r},${s.c}`===key2)){lightBlocks=lightBlocks.filter(x=>x!==lightDrag.index);lightBlocks.push(key2)}}lightDrag=null;renderLight()}})};
+const previousLightRender=renderLight;renderLight=function(){previousLightRender();const grid=document.querySelector('.light-grid');if(!grid)return;document.querySelectorAll('[data-light]').forEach(cell=>{const key=cell.dataset.light,src=lightSources.findIndex(s=>`${s.r},${s.c}`===key),block=lightBlocks.includes(key);cell.onpointerdown=e=>{if(e.button!==0||src<0&&!block)return;if(src>=0&&lightSources[src]?.locked){e.preventDefault();e.stopImmediatePropagation();return}lightDrag={type:src>=0?'sun':'block',index:src>=0?src:key,originX:e.clientX,originY:e.clientY,cell};cell.setPointerCapture?.(e.pointerId)};cell.onpointermove=e=>{if(!lightDrag||lightDrag.cell!==cell)return;cell.style.transform=`translate(${e.clientX-lightDrag.originX}px,${e.clientY-lightDrag.originY}px)`};cell.onpointerup=e=>{if(!lightDrag||lightDrag.cell!==cell)return;const target=document.elementFromPoint(e.clientX,e.clientY)?.closest('[data-light]');cell.style.transform='';if(target){const key2=target.dataset.light;if(lightDrag.type==='sun'&&!lightSources.some((s,i)=>i!==lightDrag.index&&`${s.r},${s.c}`===key2)){const [r,c]=key2.split(',').map(Number);lightSources[lightDrag.index].r=r;lightSources[lightDrag.index].c=c;lightSelected=lightDrag.index}if(lightDrag.type==='block'&&!lightSources.some(s=>`${s.r},${s.c}`===key2)){lightBlocks=lightBlocks.filter(x=>x!==lightDrag.index);lightBlocks.push(key2)}}lightDrag=null;renderLight()}})};
 let lightHover=null;document.addEventListener('pointerover',e=>{const cell=e.target.closest?.('[data-light]');if(cell){const idx=Number(cell.dataset.source);if(idx>=0)lightHover={type:'sun',index:idx};else if(lightBlocks.includes(cell.dataset.light))lightHover={type:'block',index:cell.dataset.light}}});document.addEventListener('keydown',e=>{if(e.key.toLowerCase()!=='r'||!lightHover)return;const id=lightHover.type==='sun'?`${lightSources[lightHover.index].r},${lightSources[lightHover.index].c}`:lightHover.index;lightRotations[id]=((lightRotations[id]||0)+1)%4;toast('ROTATED')});
 // Rotate exactly the sun under the pointer. This capture-phase handler keeps
 // the older selected-sun listener from rotating the wrong source when several
@@ -201,6 +251,8 @@ document.addEventListener('keydown',e=>{
   }
   const source=lightSources[lightHover.index];
   if(!source){e.preventDefault();e.stopImmediatePropagation();return}
+  // Orange Sun powerups stay on their original tile, but remain rotatable so
+  // players can deliberately make the Light Lock challenge harder.
   source.d=((source.d||0)+1)%8;
   lightSelected=lightHover.index;
   e.preventDefault();
@@ -220,7 +272,8 @@ document.addEventListener('pointerup',e=>{if(suppressNextPlacement){suppressNext
   document.addEventListener('pointerdown',e=>{if(e.button!==0||lightDeleteMode)return;const cell=e.target.closest?.('[data-light]');if(!cell)return;const key=cell.dataset.light,idx=lightSources.findIndex(s=>`${s.r},${s.c}`===key),isBlock=lightBlocks.includes(key);
     if(suppressNextPlacement){suppressNextPlacement=false;return}if(mode==='sun'&&idx<0&&lightSources.length<3){const [r,c]=key.split(',').map(Number);lightSources.push({r,c,d:0});lightSelected=lightSources.length-1;mode='';renderLight();return}
     if(mode==='block'&&idx<0&&!isBlock&&lightBlocks.length<6){lightBlocks.push(key);mode='';renderLight();return}
-    if(idx>=0||isBlock){drag={type:idx>=0?'sun':'block',index:idx>=0?idx:key,cell,startX:e.clientX,startY:e.clientY};e.preventDefault();cell.setPointerCapture?.(e.pointerId)}
+     if(idx>=0&&lightSources[idx]?.locked){e.preventDefault();e.stopImmediatePropagation();return}
+     if(idx>=0||isBlock){drag={type:idx>=0?'sun':'block',index:idx>=0?idx:key,cell,startX:e.clientX,startY:e.clientY};e.preventDefault();cell.setPointerCapture?.(e.pointerId)}
   },true);
   document.addEventListener('pointermove',e=>{if(!drag)return;drag.cell.style.transform=`translate(${e.clientX-drag.startX}px,${e.clientY-drag.startY}px)`;e.preventDefault()},true);
   document.addEventListener('pointerup',e=>{if(!drag)return;
@@ -268,7 +321,7 @@ document.addEventListener('contextmenu',e=>{if(e.target.closest?.('.light-grid')
 // between the block-relative 0° ray and the nearer +/-45° ray. The source's
 // facing direction defines 0° for every one of the eight 45° orientations.
 lightCells=function(){
-  const lit=new Set(),shadow=new Set();
+  const lit=new Set(),shadow=new Set(),orange=new Set();
   const forwardDirs=[[-1,0],[-1,-1],[0,-1],[1,-1],[1,0],[1,1],[0,1],[-1,1]];
   const sideDirs=[[0,1],[-1,1],[-1,0],[-1,-1],[0,-1],[1,-1],[1,0],[1,1]];
   const inGrid=(r,c)=>r>=0&&r<lightSize&&c>=0&&c<lightSize;
@@ -319,10 +372,12 @@ lightCells=function(){
     // remove shadows from each source before combining their visible beams.
     sourceShadow.forEach(k=>sourceBeam.delete(k));
     sourceBeam.forEach(k=>lit.add(k));
+    if(s.orange)sourceBeam.forEach(k=>orange.add(k));
     sourceShadow.forEach(k=>shadow.add(k));
   });
   // Only expose shadows that remain dark after all suns are combined.
   lightShadowCells=new Set([...shadow].filter(k=>!lit.has(k)));
+  lightOrangeCells=new Set([...orange].filter(k=>lit.has(k)));
   return lit;
 };
 
@@ -374,27 +429,10 @@ function toggleLightSolution(){
   setTimeout(ensureLightSolutionButton,0);
 }
 
-// The Light Lock renderer is intentionally overridden in several historical
-// versions of this file. Keep this control independent of those render paths
-// so it is present on every fresh board and after every re-render.
+// The old one-use solution control has been retired. Remove any stale copy
+// left by historical render paths so a fresh Light Lock board never shows it.
 function ensureLightSolutionButton(){
-  const controls=document.querySelector('.light-controls');
-  if(!controls)return;
-  let button=document.querySelector('#showLightSolution');
-  if(!button){
-    button=document.createElement('button');
-    button.id='showLightSolution';
-    button.className='primary';
-    button.onclick=toggleLightSolution;
-    const check=controls.querySelector('#checkLight');
-    controls.insertBefore(button,check||null);
-  }
-  const label=lightFreeSolutionUsed?'SOLUTION USED':'PLACE SOLUTION · 1 USE';
-  if(button.textContent!==label)button.textContent=label;
-  button.disabled=!lightSolutionShown&&lightFreeSolutionUsed;
-  button.setAttribute('aria-disabled',String(button.disabled));
-  const pressed=String(lightSolutionShown);
-  if(button.getAttribute('aria-pressed')!==pressed)button.setAttribute('aria-pressed',pressed);
+  document.querySelectorAll('#showLightSolution').forEach(button=>button.remove());
 }
 (()=>{
   const observer=new MutationObserver(ensureLightSolutionButton);
@@ -457,16 +495,25 @@ function showLightLevelVictory(completedLevel){
 function updateLightProgress(){
   const layout=document.querySelector('.light-layout');
   if(!layout)return;
-  let bar=layout.parentElement.querySelector('.light-level-progress');
+  let bar=layout.parentElement.querySelector('.light-level-progress, .run-progress');
   if(!bar){
     bar=document.createElement('div');
-    bar.className='light-level-progress';
     layout.parentElement.insertBefore(bar,layout);
   }
-  bar.innerHTML=`<div class="light-level-progress-head"><span>LIGHT LOCK RUN</span><b>LEVEL ${lightLevel} / 3</b></div><div class="light-level-progress-track" aria-label="${lightLevelsCompleted} of 3 levels complete">${[1,2,3].map(level=>`<i class="${level<=lightLevelsCompleted?'filled':''}"></i>`).join('')}</div>`;
+  const progress=Math.round(Math.max(0,Math.min(3,lightLevelsCompleted))/3*100);
+  bar.className='run-progress';
+  bar.innerHTML=`<div class="run-progress-head"><span>LEVEL ${Math.max(1,Math.min(3,lightLevel))}</span><b>${progress}% COMPLETE</b><span>LEVEL 3</span></div><div class="run-progress-track" aria-label="${lightLevelsCompleted} of 3 levels complete"><div class="run-progress-fill" style="--progress:${progress}%"></div></div>`;
 }
 
 const lightRenderWithProgress=renderLight;
+function decorateLightOrange(){
+  document.querySelectorAll('.light-grid [data-light]').forEach(cell=>{
+    const key=cell.dataset.light;
+    const source=lightSources.find(s=>`${s.r},${s.c}`===key);
+    cell.classList.toggle('orange-beam',lightOrangeCells.has(key));
+    cell.classList.toggle('orange-sun',!!source?.orange);
+  });
+}
 renderLight=function(){
   lightRenderWithProgress();
   updateLightProgress();
@@ -479,5 +526,46 @@ renderLight=function(){
     if(legend.parentElement!==shellEl)shellEl.append(legend);
   }
   ensureLightSolutionButton();
+  decorateLightOrange();
 };
+
+// Light Lock has no inventory cap. The board itself is the only constraint:
+// a sun or block can be placed in every unoccupied grid cell. This capture
+// layer supersedes older render paths that still contained historical 3-sun
+// or 6-block limits.
+(()=>{
+  let unlimitedMode='';
+  const stop=e=>{e.preventDefault();e.stopImmediatePropagation()};
+  window.addEventListener('click',e=>{
+    const target=e.target.closest?.('#addSun, #addBlock');
+    if(!target)return;
+    unlimitedMode=target.id==='addSun'?'sun':'block';
+    lightPlaceMode=false;
+    lightBlockMode=false;
+    stop(e);
+    toast(unlimitedMode==='sun'?'CLICK AN EMPTY CUBE TO PLACE A SUN':'CLICK AN EMPTY CUBE TO PLACE A BLOCK');
+  },true);
+  window.addEventListener('pointerup',e=>{
+    if(!unlimitedMode)return;
+    const cell=e.target.closest?.('[data-light]');
+    if(!cell)return;
+    const key=cell.dataset.light;
+    const hasSun=lightSources.some(source=>`${source.r},${source.c}`===key);
+    const hasBlock=lightBlocks.includes(key);
+    if(hasSun||hasBlock)return;
+    if(unlimitedMode==='sun'){
+      const [r,c]=key.split(',').map(Number);
+      lightSources.push({r,c,d:0});
+      lightSelected=lightSources.length-1;
+      unlimitedMode='';
+      stop(e);
+      renderLight();
+    }else if(unlimitedMode==='block'){
+      lightBlocks.push(key);
+      unlimitedMode='';
+      stop(e);
+      renderLight();
+    }
+  },true);
+})();
 

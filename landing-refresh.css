@@ -104,8 +104,6 @@ button{border-radius:0!important}
 .light-cell.shadow{background:#09050d!important;color:#6b2c82!important;box-shadow:inset 0 0 0 1px #2d1640!important}
 .light-cell.block{background:#8f55c7!important;color:#21042e!important;box-shadow:inset 0 0 0 2px #d9b8ff!important}
 .light-cell.block{position:relative!important;font-size:0!important;overflow:hidden!important}.light-cell.block::after{content:"";position:absolute;inset:0;background:#8f55c7;pointer-events:none}.light-cell.block:active::after{background:#8f55c7}
-.placeholder-art{background:#fff!important;color:#000!important;font:700 24px DM Mono;display:flex;align-items:center;justify-content:center;letter-spacing:2px}
-.card-top{position:relative}.wip-label{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:#000;font:700 18px DM Mono;letter-spacing:2px;margin:0}
 .delete-ring{position:absolute;inset:18%;border-radius:50%;background:conic-gradient(rgba(255,255,255,.72) var(--hold,0%),#050509 0);border:2px solid #050509;z-index:8;pointer-events:none}
 .light-cell{position:relative!important}.light-cell .delete-ring{inset:18%!important;width:auto!important;height:auto!important;transform:none!important}
 .light-grid{position:relative!important;overflow:visible!important;isolation:isolate}.light-grid .light-cell{z-index:1}.light-grid .light-cell:active{z-index:20}
@@ -150,12 +148,6 @@ button{border-radius:0!important}
 .light-grid .light-cell.solution-lit::after{display:none!important}
 .light-grid .light-cell.solution-lit.shadow{background:rgba(255,226,92,.42)!important;color:inherit!important;box-shadow:inset 0 0 16px rgba(255,248,173,.78)!important}
 
-.light-level-progress{width:min(490px,82vw);margin:0 auto 14px}
-.light-level-progress-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;color:#21042e;font:700 10px DM Mono;letter-spacing:.06em}
-.light-level-progress-track{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;height:12px}
-.light-level-progress-track i{display:block;background:#e5def0;border:2px solid #8f55c7}
-.light-level-progress-track i.filled{background:#8f55c7;box-shadow:inset 0 0 8px rgba(217,184,255,.75)}
-
 /* Keep the Light Lock legend in the far-right side of the white game panel,
    vertically centered beside the board and controls. */
 .game-shell>.light-legend{
@@ -172,5 +164,35 @@ button{border-radius:0!important}
   color:#6b2c82!important;
 }
 .game-shell>.light-legend b{display:block;margin-bottom:5px;color:#21042e}
-.light-controls #showLightSolution:disabled{opacity:.5;cursor:not-allowed}
+/* One-use Light Lock Orange Sun powerup. The source remains a fixed tile while
+   its beam is visibly distinct from the normal yellow light. */
+.light-grid .light-cell.orange-beam{
+  background:linear-gradient(135deg,#ffd7a0 0%,#ff9a3d 48%,#e85d1a 100%)!important;
+  box-shadow:inset 0 0 12px rgba(255,244,205,.9),0 0 9px rgba(255,126,36,.65)!important;
+}
+.light-grid .light-cell.orange-sun{
+  color:#ff7d28!important;
+  background:#241008!important;
+  text-shadow:0 0 8px #ff8a3d,0 0 14px rgba(255,126,36,.8)!important;
+  cursor:default!important;
+}
+
+/* Calculator Clash game board. The ten-key pad keeps empty keys visually blank
+   while three shuffled keys reveal the legal integer operations for the level. */
+.calculator-panel{max-width:590px;margin:18px auto 0;padding:18px;background:#e7d6f3;border:2px solid #21042e;box-shadow:5px 5px 0 #8f55c7}
+.calculator-screen{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;background:#21042e;color:#fff8df;border:2px solid #21042e;padding:10px;margin-bottom:10px}.calculator-screen>div{display:flex;flex-direction:column;gap:4px}.calculator-screen small{font:9px DM Mono;letter-spacing:1px;color:#d9b8ff}.calculator-screen b,.calculator-screen strong{font:26px Archivo Black;color:#fff8df}.calculator-screen strong{color:#eaf238}
+.calculator-timer{display:flex;justify-content:space-between;align-items:center;margin:0 0 14px;padding:7px 10px;background:#fff8df;border:2px solid #21042e;color:#21042e;font:700 11px DM Mono;letter-spacing:1px}.calculator-timer strong{font:18px Archivo Black;color:#ed4a54}
+.calculator-pad{display:grid;grid-template-columns:repeat(5,1fr);gap:9px}.calculator-key{min-height:68px;border:2px solid #21042e;background:#efe9ff;color:#21042e;font:700 22px DM Mono;cursor:pointer;box-shadow:3px 3px 0 #8f55c7;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}.calculator-key.live{background:#fff8df}.calculator-key.live:hover{background:#eaf238}.calculator-key.used{background:#eaf238}.calculator-key small{min-height:10px;font:8px DM Mono;letter-spacing:.5px}.calculator-key:disabled{cursor:default}.calculator-key:not(.live){color:transparent;background:#d9cde3;box-shadow:none}.calculator-hint{margin:14px 0 0;text-align:center;font:11px/1.5 DM Mono;color:#21042e}
+@media(max-width:600px){.calculator-screen b,.calculator-screen strong{font-size:20px}.calculator-key{min-height:55px;font-size:18px}}
+
+/* Keep the three-card first row, but center the two-card second row. */
+@media(min-width:801px){
+  .game-grid{grid-template-columns:repeat(6,minmax(0,1fr))!important}
+  .game-grid .game-card{grid-column:span 2}
+  .game-grid .game-card:nth-child(4){grid-column:2 / span 2}
+  .game-grid .game-card:nth-child(5){grid-column:4 / span 2}
+}
+@media(max-width:800px){
+  .game-grid .game-card{grid-column:auto}
+}
 

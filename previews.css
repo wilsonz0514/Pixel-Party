@@ -49,3 +49,11 @@
 .light-preview-block{position:absolute;z-index:5;left:calc(50% + 8px);top:calc(50% + 30px);width:20px;height:20px;background:#8f55c7;border:2px solid #d9b8ff;box-shadow:3px 3px 0 rgba(5,5,9,.65);transform:rotate(-2deg)}
 .game-card:hover .light-preview-sun{animation:light-sun-pulse .8s ease-in-out infinite alternate}
 @keyframes light-sun-pulse{to{transform:rotate(-8deg) scale(1.12);text-shadow:0 0 16px rgba(255,230,106,1)}}
+
+/* Calculator Clash preview: a compact, tactile keypad with three live moves. */
+.calculator-art{background:#321044!important;color:#fff8df;padding:18px!important}
+.calculator-preview{width:min(210px,78%);padding:12px;background:#21042e;border:2px solid #d46af4;box-shadow:7px 7px 0 rgba(5,5,9,.55);transform:rotate(-2deg)}
+.calculator-preview-screen{display:flex;align-items:end;justify-content:space-between;background:#efe9ff;color:#21042e;border:2px solid #21042e;padding:7px 9px;margin-bottom:10px;font-family:DM Mono}
+.calculator-preview-screen small{font-size:8px;letter-spacing:1px}.calculator-preview-screen b{font:22px Archivo Black}
+.calculator-preview-keys{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}.calculator-preview-keys span{display:grid;place-items:center;min-height:27px;background:#fff8df;color:#21042e;border:1.5px solid #21042e;font:700 13px DM Mono}.calculator-preview-keys span:nth-child(1),.calculator-preview-keys span:nth-child(3),.calculator-preview-keys span:nth-child(5){background:#eaf238;color:#21042e}
+.game-card:hover .calculator-preview{transform:rotate(0) translateY(-4px);transition:transform .25s ease}.game-card:hover .calculator-preview-keys span:nth-child(1){animation:key-pulse .7s ease-in-out infinite alternate}@keyframes key-pulse{to{transform:translateY(-2px);background:#ff8066}}
